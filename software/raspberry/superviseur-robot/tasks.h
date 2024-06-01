@@ -66,6 +66,14 @@ private:
     ComRobot robot;
     int robotStarted = 0;
     int move = MESSAGE_ROBOT_STOP;
+
+    int watchdog_id = MESSAGE_ROBOT_START_WITHOUT_WD;
+    int counter = 0;
+    Camera * cam;
+    int camOpen = 0;
+    Arena arena ; 
+    int arena_ok = 0;
+    int robot_position = 0;
     
     /**********************************************************************/
     /* Tasks                                                              */
@@ -76,6 +84,11 @@ private:
     RT_TASK th_openComRobot;
     RT_TASK th_startRobot;
     RT_TASK th_move;
+
+    RT_TASK th_battery;
+    RT_TASK th_watchdog;
+    RT_TASK th_cam;
+    RT_TASK th_Arena;
     
     /**********************************************************************/
     /* Mutex                                                              */
@@ -85,6 +98,9 @@ private:
     RT_MUTEX mutex_robotStarted;
     RT_MUTEX mutex_move;
 
+    RT_MUTEX mutex_counter;
+    RT_MUTEX mutex_cam;
+
     /**********************************************************************/
     /* Semaphores                                                         */
     /**********************************************************************/
@@ -92,6 +108,12 @@ private:
     RT_SEM sem_openComRobot;
     RT_SEM sem_serverOk;
     RT_SEM sem_startRobot;
+
+    RT_SEM sem_batteryRobot;
+    RT_SEM sem_watchdog;
+    RT_SEM sem_cam;
+    RT_SEM sem_Arena;
+    RT_SEM sem_ArenaOk;
 
     /**********************************************************************/
     /* Message queues                                                     */
@@ -131,6 +153,48 @@ private:
      * @brief Thread handling control of the robot.
      */
     void MoveTask(void *arg);
+
+    /**
+     * @brief Thread handling the battery level of the robot.
+     */
+    void BatteryTask(void *arg);
+
+     /**
+     * @brief Thread handling the watchdog of the robot.
+     */
+    void WatchdogTask(void *arg);
+
+    /**
+     * @brief Thread handling the counter of errors of the robot.
+     */
+    void Counter(Message *msg);
+
+    /**
+     * @brief Thread handling the opening of the camera.
+     */
+    void OpenCameraTask(void *arg);
+
+    /**
+     * @brief Thread handling the closing of the camera.
+     */
+    void CloseCameraTask(void *arg);
+
+    /**
+     * @brief Thread handling the image detection.
+     */
+    void CameraTask(void *arg);
+
+    /**
+     * @brief Thread handling the arena detection.
+     */
+    void ArenaTask(void *arg);
+
+    /**
+     * @brief Thread handling the position detection.
+     */
+    void PositionCalc(Img * img);
+
+    void MonitorError(Message * msgReceived);
     
     /**********************************************************************/
     /* Queue services                                                     */
@@ -152,4 +216,3 @@ private:
 };
 
 #endif // __TASKS_H__ 
-
